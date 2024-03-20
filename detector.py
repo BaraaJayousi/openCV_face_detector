@@ -1,6 +1,7 @@
 from Modules.arguments import detector_arguments
 from Modules.trainer import encode_known_faces
 from Modules.face_detector import recognize_faces
+from Modules.validate_training import validate
 from Modules.constants import *
 
 
@@ -16,3 +17,5 @@ if __name__ == "__main__":
         encode_known_faces(model= args.m)
     if args.test:
         recognize_faces(image_location=args.f, model=args.m)
+    if args.validate:
+        validate(model = args.m)

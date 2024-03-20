@@ -2,9 +2,10 @@ from pathlib import Path
 import face_recognition
 import pickle
 from collections import Counter
-from PIL import Image, ImageDraw
+from PIL import Image, ImageDraw, ImageFont
 from .constants import *
 
+font_size = int(FONT_SIZE)
 def _recognize_face(unknown_encoding, loaded_encodings):
     boolean_matches = face_recognition.compare_faces(loaded_encodings["encodings"], unknown_encoding)
     
@@ -17,6 +18,9 @@ def _recognize_face(unknown_encoding, loaded_encodings):
         return votes.most_common(1)[0][0]
     
 
+
+
+
 def _display_face(draw, bounding_box, name):
     top, right, bottom, left = bounding_box
     draw.rectangle(((left, top), (right, bottom)), outline=BOUNDING_BOX_COLOR)
@@ -26,21 +30,28 @@ def _display_face(draw, bounding_box, name):
 
     #draws a rectangle around the text
     draw.rectangle(
-        ((text_left, text_top), (text_right, text_bottom)),
+        ((text_left, text_top), (text_right+font_size*2.5, text_bottom+font_size)),
         fill="blue",
         outline="blue",
     )
 
     # draws the desired text
+    font = ImageFont.truetype('arial.ttf', font_size)
     draw.text(
         (text_left, text_top),
         name,
         fill="white",
+        font=font
     )
+
+
+
+
 def recognize_faces(
     image_location: str,
     model: str = "hog",
     encodings_location: Path = DEFAULT_ENCODINGS_PATH,
+    validation = False
 ) -> None:
     print("recognizing faces....")
     with encodings_location.open(mode="rb") as f:
@@ -59,8 +70,11 @@ def recognize_faces(
         name = _recognize_face(unknown_encoding, loaded_encodings)
         if not name:
             name = "unknown"
-        _display_face(draw, bounding_box, name)
+        
+        if not validation:
+            _display_face(draw, bounding_box, name)
     
     print("recognizing faces is done!>>>>> Opening Image...")
+    
     del draw
     pillow_image.show()
